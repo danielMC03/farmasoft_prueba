@@ -1,32 +1,21 @@
 // Configuración de la URL Base de la API
 const BASE_URL = "http://localhost/FARMASOFT_3288361/Backend";
-// Función para obtener la lista de clientes
+
+// --- MÓDULO CLIENTES ---
+
+// 1. Obtener lista de clientes
 export async function obtenerClientes() {
   try {
     const response = await fetch(`${BASE_URL}/clientes/listar.php`);
-    if (!response.ok) {
-      throw new Error("Error al obtener clientes");
-    }
+    if (!response.ok) throw new Error("Error al obtener clientes");
     return await response.json();
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
-// Función para obtener la lista de productos
-export async function obtenerProductos() {
-  try {
-    const response = await fetch(`${BASE_URL}/productos/listar.php`);
-    if (!response.ok) {
-      throw new Error("Error al obtener productos");
-    }
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-// Función para crear un nuevo cliente
+
+// 2. Crear un nuevo cliente
 export async function crearCliente(cliente) {
   try {
     const response = await fetch(`${BASE_URL}/clientes/Crear.php`, {
@@ -36,9 +25,10 @@ export async function crearCliente(cliente) {
       },
       body: JSON.stringify(cliente),
     });
+    if (!response.ok) throw new Error("Error al crear cliente");
     return await response.json();
   } catch (error) {
-    console.error("Error al crear cliente:", error);
+    console.error(error);
     throw error;
   }
 }

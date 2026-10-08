@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { obtenerClientes } from "../services/api";
-export default function Clientes() {
-  const [listaClientes, setListacientes] = useState([]);
-  const [loading, setloading] = useState(true);
+import { obtenerClientes, crearCliente } from "../services/api";
 
-  // Estados para el formulario de nuevo cliente
+export default function Clientes() {
+  const [listaclientes, setListaClientes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Campos del formulario
   const [nombre, setNombre] = useState("");
   const [documento, setDocumento] = useState("");
   const [telefono, setTelefono] = useState("");
   const [email, setEmail] = useState("");
+  const [mensaje, setMensaje] = useState("");
 
-  // Función para cargar los clientes
+  // Función para cargar los clientes desde el Backend
   const cargarClientes = async () => {
     try {
       const data = await obtenerClientes();
-      setListaclientes(data);
+      setListaClientes(data);
       setLoading(false);
     } catch (error) {
       console.error("Error al cargar clientes:", error);
@@ -26,179 +28,212 @@ export default function Clientes() {
     cargarClientes();
   }, []);
 
-  // Función para registrar el cliente
-  const registrarCliente = (e) => {
+  // Función para enviar el formulario y guardar en la BD
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMensaje("");
+    try {
+      const nuevoCliente = { nombre, documento, telefono, email };
+      await crearCliente(nuevoCliente);
+      setMensaje("¡Cliente registrado con éxito!");
 
-    const nuevoCliente = { nombre, documento, telefono, email };
+      // Limpiar el formulario
+      setNombre("");
+      setDocumento("");
+      setTelefono("");
+      setEmail("");
 
-    fetch("http://localhost/FARMASOFT_3288361/Backend/clientes/Crear.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(nuevoCliente),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.mensaje) {
-          alert(data.mensaje);
-          // Limpiar formulario
-          setNombre("");
-          setDocumento("");
-          setTelefono("");
-          setEmail("");
-          // Recargar la tabla
-          cargarClientes();
-        } else {
-          alert("Error: " + data.error);
-        }
-      })
-      .catch((error) => console.error("Error en el registro:", error));
+      // Volver a cargar la lista actualizada
+      cargarClientes();
+    } catch (error) {
+      console.error("Error al crear cliente:", error);
+      setMensaje("Error al registrar el cliente");
+    }
   };
 
   return (
-    <div>
-      <h1 style={{ color: "#1e293b", marginBottom: "10px" }}>
-        Gestión de Clientes
-      </h1>
-      <p style={{ color: "#555", marginBottom: "20px" }}>
-        Listado general conectado desde la base de datos.
-      </p>
+    <div style={{ padding: "20px" }}>
+      <h2>Gestión de Clientes</h2>
 
       {/* Formulario de Registro */}
-      <form
-        onSubmit={registrarCliente}
+      <div
         style={{
-          background: "#f8fafc",
+          background: "#fff",
           padding: "20px",
           borderRadius: "8px",
-          marginBottom: "30px",
-          border: "1px solid #e2e8f0",
+          marginBottom: "20px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
         <h3>Registrar Nuevo Cliente</h3>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "15px",
-            marginBottom: "15px",
-          }}
+        {mensaje && (
+          <p
+            style={{
+              fontWeight: "bold",
+              color: mensaje.includes("Error") ? "red" : "green",
+            }}
+          >
+            {mensaje}
+          </p>
+        )}
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "grid", gap: "10px", maxWidth: "400px" }}
         >
-          <input
-            type="text"
-            placeholder="Nombre completo"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
+          <div>
+            <label>Nombre Completo:</label>
+            <input
+              type="text"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              required
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+            />
+          </div>
+          <div>
+            <label>Documento / Cédula:</label>
+            <input
+              type="text"
+              value={documento}
+              onChange={(e) => setDocumento(e.target.value)}
+              required
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+            />
+          </div>
+          <div>
+            <label>Teléfono:</label>
+            <input
+              type="text"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+            />
+          </div>
+          <div>
+            <label>Correo Electrónico:</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+            />
+          </div>
+          <button
+            type="submit"
             style={{
-              padding: "8px",
+              padding: "10px",
+              backgroundColor: "#007bff",
+              color: "#fff",
+              border: "none",
               borderRadius: "4px",
-              border: "1px solid #cbd5e1",
+              cursor: "pointer",
+              fontWeight: "bold",
             }}
-          />
-          <input
-            type="text"
-            placeholder="Documento"
-            value={documento}
-            onChange={(e) => setDocumento(e.target.value)}
-            required
-            style={{
-              padding: "8px",
-              borderRadius: "4px",
-              border: "1px solid #cbd5e1",
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Teléfono"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            required
-            style={{
-              padding: "8px",
-              borderRadius: "4px",
-              border: "1px solid #cbd5e1",
-            }}
-          />
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{
-              padding: "8px",
-              borderRadius: "4px",
-              border: "1px solid #cbd5e1",
-            }}
-          />
-        </div>
-        <button
-          type="submit"
-          style={{
-            background: "#0ea5e9",
-            color: "white",
-            padding: "10px 20px",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Guardar Cliente
-        </button>
-      </form>
+          >
+            Guardar Cliente
+          </button>
+        </form>
+      </div>
 
-      {/* Tabla de Listado */}
-      <table
-        className="table"
+      {/* Tabla de Clientes */}
+      <div
         style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          background: "white",
+          background: "#fff",
+          padding: "20px",
+          borderRadius: "8px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
-        <thead>
-          <tr style={{ background: "#1e293b", color: "white" }}>
-            <th style={{ padding: "10px" }}>IDENTIFICACIÓN</th>
-            <th style={{ padding: "10px" }}>Nombre</th>
-            <th style={{ padding: "10px" }}>Documento</th>
-            <th style={{ padding: "10px" }}>Teléfono</th>
-            <th style={{ padding: "10px" }}>Correo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
-                Cargando datos...
-              </td>
-            </tr>
-          ) : listaClientes.length > 0 ? (
-            listaClientes.map((cliente) => (
-              <tr
-                key={cliente.id}
-                style={{ borderBottom: "1px solid #e2e8f0" }}
-              >
-                <td style={{ padding: "10px", textAlign: "center" }}>
-                  {cliente.id}
-                </td>
-                <td style={{ padding: "10px" }}>{cliente.nombre}</td>
-                <td style={{ padding: "10px" }}>{cliente.documento}</td>
-                <td style={{ padding: "10px" }}>{cliente.telefono}</td>
-                <td style={{ padding: "10px" }}>{cliente.email}</td>
+        <h3>Lista de Clientes Registrados</h3>
+        {loading ? (
+          <p>Cargando clientes...</p>
+        ) : (
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              marginTop: "10px",
+            }}
+          >
+            <thead>
+              <tr style={{ backgroundColor: "#f2f2f2", textAlign: "left" }}>
+                <th style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+                  ID
+                </th>
+                <th style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+                  Nombre
+                </th>
+                <th style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+                  Documento
+                </th>
+                <th style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+                  Teléfono
+                </th>
+                <th style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+                  Email
+                </th>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
-                No hay clientes registrados en la base de datos.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {listaclientes.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="5"
+                    style={{ padding: "10px", textAlign: "center" }}
+                  >
+                    No hay clientes registrados
+                  </td>
+                </tr>
+              ) : (
+                listaclientes.map((cli, index) => (
+                  <tr key={cli.id || index}>
+                    <td
+                      style={{
+                        padding: "10px",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      {cli.id}
+                    </td>
+                    <td
+                      style={{
+                        padding: "10px",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      {cli.nombre}
+                    </td>
+                    <td
+                      style={{
+                        padding: "10px",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      {cli.documento}
+                    </td>
+                    <td
+                      style={{
+                        padding: "10px",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      {cli.telefono}
+                    </td>
+                    <td
+                      style={{
+                        padding: "10px",
+                        borderBottom: "1px solid #ddd",
+                      }}
+                    >
+                      {cli.email}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
