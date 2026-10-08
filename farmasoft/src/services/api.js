@@ -63,3 +63,34 @@ export async function crearProducto(producto) {
     throw error;
   }
 }
+// --- MÓDULO VENTAS ---
+
+// 5. Obtener lista de ventas
+export async function obtenerVentas() {
+  try {
+    const response = await fetch(`${BASE_URL}/ventas/listar.php`);
+    if (!response.ok) throw new Error("Error al obtener ventas");
+    return await response.json();
+  } catch (error) {
+    console.error("Error al obtener ventas:", error);
+    throw error;
+  }
+}
+
+// 6. Registrar una nueva venta
+export async function crearVenta(venta) {
+  try {
+    const response = await fetch(`${BASE_URL}/ventas/Crear.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(venta),
+    });
+    if (!response.ok) throw new Error("Error al registrar venta");
+    return await response.json();
+  } catch (error) {
+    console.error("Error al crear venta:", error);
+    throw error;
+  }
+}
