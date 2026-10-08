@@ -19,11 +19,7 @@ export default function Clientes() {
     } catch (error) {
       console.error("Error al cargar clientes:", error);
       setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error al cargar clientes:", error);
-        setloading(false);
-      });
+    }
   };
 
   useEffect(() => {
