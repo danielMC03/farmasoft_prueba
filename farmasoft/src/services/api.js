@@ -32,3 +32,34 @@ export async function crearCliente(cliente) {
     throw error;
   }
 }
+// --- MÓDULO PRODUCTOS ---
+
+// 3. Obtener lista de productos
+export async function obtenerProductos() {
+  try {
+    const response = await fetch(`${BASE_URL}/productos/listar.php`);
+    if (!response.ok) throw new Error("Error al obtener productos");
+    return await response.json();
+  } catch (error) {
+    console.error("Error al obtener productos:", error);
+    throw error;
+  }
+}
+
+// 4. Crear un nuevo producto
+export async function crearProducto(producto) {
+  try {
+    const response = await fetch(`${BASE_URL}/productos/Crear.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(producto),
+    });
+    if (!response.ok) throw new Error("Error al crear producto");
+    return await response.json();
+  } catch (error) {
+    console.error("Error al crear producto:", error);
+    throw error;
+  }
+}
