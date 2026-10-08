@@ -16,10 +16,7 @@ try {
         $pass
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    if ($pdo) {
-        echo "Conexion exitosa";
-    }
+
 } catch (PDOException $e) {
     echo json_encode([
         "error" => $e->getMessage()
