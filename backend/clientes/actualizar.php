@@ -1,35 +1,31 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json");
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+include_once "../config/database.php";
 
-require_once "../config/database.php";
+$data = json_decode(file_get_contents("php://input"));
 
-$data = json_decode(file_get_contents("php://input"), true);
+if(!empty($data->id) && !empty($data->nombre) && !empty($data->documento)) {
+    $sql = "UPDATE clientes SET nombre = :nombre, documento = :documento, email = :email, telefono = :telefono, direccion = :direccion WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    
+    $resultado = $stmt->execute([
+        ':id' => $data->id,
+        ':nombre' => $data->nombre,
+        ':documento' => $data->documento,
+        ':email' => $data->email,
+        ':telefono' => $data->telefono,
+        ':direccion' => $data->direccion
+    ]);
 
-if (!empty($data['id']) && !empty($data['nombre']) && !empty($data['documento'])) {
-    try {
-        $stmt = $pdo->prepare("UPDATE clientes SET nombre = ?, documento = ?, email = ?, telefono = ?, direccion = ? WHERE id = ?");
-        $stmt->execute([
-            $data['nombre'],
-            $data['documento'],
-            $data['email'] ?? '',
-            $data['telefono'] ?? '',
-            $data['direccion'] ?? '',
-            $data['id']
-        ]);
-
-        echo json_encode(["status" => "success", "message" => "Cliente actualizado con éxito"]);
-    } catch (PDOException $e) {
-        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    if($resultado) {
+        echo json_encode(["success" => "Cliente actualizado correctamente"]);
+    } else {
+        echo json_encode(["error" => "No se pudo actualizar el cliente"]);
     }
 } else {
-    echo json_encode(["status" => "error", "message" => "Faltan datos obligatorios"]);
+    echo json_encode(["error" => "Faltan datos obligatorios"]);
 }
 ?>
